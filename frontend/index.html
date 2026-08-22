@@ -6,7 +6,7 @@
 <title>לוח מטבעות | חדשות ומחירים</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Heebo:wght@300;400;500;700;800&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.5.1/chart.umd.min.js"></script>
 <style>
   :root {
     --ink: #0D1117;
@@ -456,6 +456,12 @@ function renderChartTabs() {
   });
 }
 
+function formatChartLabel(d, range) {
+  if (range === "1d") return d.toLocaleTimeString("he-IL", { hour: "2-digit", minute: "2-digit" });
+  if (range === "1y") return d.toLocaleDateString("he-IL", { month: "short", year: "2-digit" });
+  return d.toLocaleDateString("he-IL", { day: "2-digit", month: "2-digit" });
+}
+
 async function loadChart() {
   const wrap = document.querySelector(".chart-wrap");
   const canvas = document.getElementById("priceChart");
@@ -472,7 +478,7 @@ async function loadChart() {
       return;
     }
     wrap.querySelectorAll(".chart-loading").forEach(e => e.remove());
-    const labels = data.prices.map(p => new Date(p[0]));
+    const labels = data.prices.map(p => formatChartLabel(new Date(p[0]), activeChartRange));
     const values = data.prices.map(p => p[1]);
 
     if (chartInstance) chartInstance.destroy();
@@ -494,8 +500,10 @@ async function loadChart() {
         responsive: true, maintainAspectRatio: false,
         plugins: { legend: { display: false } },
         scales: {
-          x: { type: "time", time: { unit: activeChartRange === "1d" ? "hour" : (activeChartRange === "1y" ? "month" : "day") },
-               ticks: { color: "#838C9B", maxTicksLimit: 6, font: { family: "JetBrains Mono", size: 10 } },
+          // שימוש ב-category (ולא time) בכוונה - כדי לא להיות תלויים בספריית
+          // date-adapter נוספת שעלולה שלא להיטען מה-CDN.
+          x: { type: "category",
+               ticks: { color: "#838C9B", maxTicksLimit: 6, font: { family: "JetBrains Mono", size: 10 }, autoSkip: true },
                grid: { color: "#232933" } },
           y: { ticks: { color: "#838C9B", font: { family: "JetBrains Mono", size: 10 } }, grid: { color: "#232933" } },
         },
