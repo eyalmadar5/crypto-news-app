@@ -6,6 +6,7 @@
 <title>לוח מטבעות | חדשות ומחירים</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Heebo:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
 <style>
   :root {
     --ink: #0D1117;
@@ -34,198 +35,144 @@
   .wrap { max-width: 1080px; margin: 0 auto; padding: 28px 20px 80px; }
 
   header.top {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-    border-bottom: 1px solid var(--line);
-    padding-bottom: 18px;
-    margin-bottom: 26px;
-    flex-wrap: wrap;
-    gap: 12px;
+    display: flex; justify-content: space-between; align-items: flex-end;
+    border-bottom: 1px solid var(--line); padding-bottom: 18px; margin-bottom: 26px;
+    flex-wrap: wrap; gap: 12px;
   }
-  header.top .title-block .eyebrow {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 0.18em;
-    color: var(--amber);
-    text-transform: uppercase;
+  header.top .eyebrow {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.18em;
+    color: var(--amber); text-transform: uppercase;
   }
-  header.top h1 {
-    font-size: 26px;
-    font-weight: 800;
-    margin: 4px 0 0;
-    letter-spacing: -0.01em;
-  }
+  header.top h1 { font-size: 26px; font-weight: 800; margin: 4px 0 0; letter-spacing: -0.01em; }
   #refreshBtn {
-    background: var(--amber);
-    color: #1a1206;
-    border: none;
-    font-family: 'Heebo', sans-serif;
-    font-weight: 700;
-    font-size: 14px;
-    padding: 10px 18px;
-    border-radius: 6px;
-    cursor: pointer;
+    background: var(--amber); color: #1a1206; border: none; font-family: 'Heebo', sans-serif;
+    font-weight: 700; font-size: 14px; padding: 10px 18px; border-radius: 6px; cursor: pointer;
     transition: filter 0.15s ease, transform 0.1s ease;
   }
   #refreshBtn:hover { filter: brightness(1.08); }
   #refreshBtn:active { transform: scale(0.97); }
   #refreshBtn:disabled { opacity: 0.5; cursor: default; }
-  #lastUpdated {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    color: var(--text-dim);
-    margin-top: 6px;
-    text-align: left;
-  }
+  #lastUpdated { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-dim); margin-top: 6px; text-align: left; }
 
-  /* ticker strip */
-  .ticker {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 10px;
-    margin-bottom: 30px;
-  }
-  @media (max-width: 760px) {
-    .ticker { grid-template-columns: repeat(2, 1fr); }
-  }
+  .ticker { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; margin-bottom: 22px; }
+  @media (max-width: 860px) { .ticker { grid-template-columns: repeat(3, 1fr); } }
   .coin-card {
-    background: var(--panel);
-    border: 1px solid var(--line);
-    border-radius: 8px;
-    padding: 14px 16px;
-    position: relative;
-    overflow: hidden;
-    cursor: pointer;
-    transition: border-color 0.15s ease, background 0.15s ease;
+    background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px;
+    cursor: pointer; transition: border-color 0.15s ease, background 0.15s ease; position: relative;
   }
   .coin-card:hover { border-color: var(--amber-dim); }
   .coin-card.active { border-color: var(--amber); background: var(--panel-hi); }
-  .coin-card .sym {
-    font-family: 'JetBrains Mono', monospace;
-    font-weight: 700;
-    font-size: 15px;
-    letter-spacing: 0.02em;
-  }
+  .coin-card .sym { font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 15px; }
   .coin-card .name { font-size: 11px; color: var(--text-dim); margin-top: 1px; }
-  .coin-card .price {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 20px;
-    font-weight: 500;
-    margin-top: 10px;
-    direction: ltr;
-    text-align: right;
-  }
-  .coin-card .chg {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 12px;
-    margin-top: 4px;
-    direction: ltr;
-    text-align: right;
-  }
-  .chg.up { color: var(--up); }
-  .chg.down { color: var(--down); }
+  .coin-card .price { font-family: 'JetBrains Mono', monospace; font-size: 19px; font-weight: 500; margin-top: 10px; direction: ltr; text-align: right; }
+  .coin-card .chg { font-family: 'JetBrains Mono', monospace; font-size: 12px; margin-top: 4px; direction: ltr; text-align: right; }
+  .chg.up { color: var(--up); } .chg.down { color: var(--down); }
   .coin-card .no-data { color: var(--text-dim); font-size: 12px; margin-top: 10px; }
-
-  /* filters */
-  .filters {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 18px;
-    flex-wrap: wrap;
+  .coin-card .remove-x {
+    position: absolute; top: 6px; left: 8px; color: var(--text-dim); font-size: 13px;
+    cursor: pointer; opacity: 0; transition: opacity 0.15s ease;
   }
+  .coin-card:hover .remove-x { opacity: 1; }
+  .coin-card .remove-x:hover { color: var(--down); }
+
+  .add-coin-card {
+    background: transparent; border: 1px dashed var(--line); border-radius: 8px;
+    display: flex; align-items: center; justify-content: center; flex-direction: column;
+    cursor: pointer; color: var(--text-dim); font-family: 'JetBrains Mono', monospace;
+    font-size: 22px; transition: border-color 0.15s ease, color 0.15s ease; min-height: 96px;
+  }
+  .add-coin-card:hover { border-color: var(--amber); color: var(--amber); }
+  .add-coin-card .lbl { font-family: 'Heebo', sans-serif; font-size: 11px; margin-top: 4px; }
+
+  .filters { display: flex; gap: 8px; margin-bottom: 18px; flex-wrap: wrap; }
   .filter-chip {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 12px;
-    padding: 7px 14px;
-    border-radius: 999px;
-    border: 1px solid var(--line);
-    background: transparent;
-    color: var(--text-dim);
-    cursor: pointer;
+    font-family: 'JetBrains Mono', monospace; font-size: 12px; padding: 7px 14px; border-radius: 999px;
+    border: 1px solid var(--line); background: transparent; color: var(--text-dim); cursor: pointer;
   }
-  .filter-chip.active {
-    border-color: var(--amber);
-    color: var(--amber);
-    background: rgba(232,163,61,0.08);
-  }
+  .filter-chip.active { border-color: var(--amber); color: var(--amber); background: rgba(232,163,61,0.08); }
 
-  /* news list */
+  /* panel: chart + summary, shown when a coin is selected */
+  .detail-panel { display: none; margin-bottom: 26px; }
+  .detail-panel.visible { display: grid; grid-template-columns: 1.3fr 1fr; gap: 14px; }
+  @media (max-width: 760px) { .detail-panel.visible { grid-template-columns: 1fr; } }
+  .panel-box { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 16px 18px; }
+  .panel-box h3 { margin: 0 0 12px; font-size: 13px; color: var(--text-dim); font-weight: 600; letter-spacing: 0.02em; }
+  .tab-row { display: flex; gap: 6px; margin-bottom: 12px; }
+  .tab-btn {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px; padding: 5px 12px; border-radius: 6px;
+    border: 1px solid var(--line); background: transparent; color: var(--text-dim); cursor: pointer;
+  }
+  .tab-btn.active { border-color: var(--amber); color: var(--amber); }
+  .chart-wrap { height: 200px; position: relative; }
+  .summary-text { font-size: 13.5px; line-height: 1.75; color: var(--text); white-space: pre-line; }
+  .summary-meta { margin-top: 12px; font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: var(--text-dim); }
+  .summary-loading, .chart-loading { color: var(--text-dim); font-size: 13px; }
+
   .section-label {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 0.14em;
-    color: var(--text-dim);
-    text-transform: uppercase;
-    margin: 26px 0 12px;
+    font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.14em; color: var(--text-dim);
+    text-transform: uppercase; margin: 26px 0 12px;
   }
-  .article {
-    background: var(--panel);
-    border: 1px solid var(--line);
-    border-radius: 8px;
-    padding: 16px 18px;
-    margin-bottom: 10px;
-    transition: border-color 0.15s ease;
-  }
+  .article { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 16px 18px; margin-bottom: 10px; transition: border-color 0.15s ease; }
   .article:hover { border-color: #333b47; }
-  .article a.title {
-    color: var(--text);
-    text-decoration: none;
-    font-weight: 600;
-    font-size: 15.5px;
-    line-height: 1.4;
-    display: block;
-  }
+  .article a.title { color: var(--text); text-decoration: none; font-weight: 600; font-size: 15.5px; line-height: 1.4; display: block; }
   .article a.title:hover { color: var(--amber); }
-  .article .summary {
-    color: var(--text-dim);
-    font-size: 13px;
-    margin-top: 6px;
-    line-height: 1.5;
-  }
-  .meta-row {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-    margin-top: 10px;
-    flex-wrap: wrap;
-  }
-  .tag {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 10.5px;
-    padding: 3px 9px;
-    border-radius: 999px;
-    border: 1px solid var(--line);
-    color: var(--text-dim);
-  }
+  .article .summary { color: var(--text-dim); font-size: 13px; margin-top: 6px; line-height: 1.5; }
+  .meta-row { display: flex; gap: 8px; align-items: center; margin-top: 10px; flex-wrap: wrap; }
+  .tag { font-family: 'JetBrains Mono', monospace; font-size: 10.5px; padding: 3px 9px; border-radius: 999px; border: 1px solid var(--line); color: var(--text-dim); }
   .tag.official { border-color: var(--official); color: var(--official); }
   .tag.coin { border-color: var(--amber-dim); color: var(--amber); }
   .tag.time { border: none; padding: 0; }
+  .tag.ai { border-color: var(--official); color: var(--official); }
 
-  .empty-state {
-    text-align: center;
-    padding: 50px 20px;
-    color: var(--text-dim);
-    font-size: 14px;
-  }
+  .empty-state { text-align: center; padding: 50px 20px; color: var(--text-dim); font-size: 14px; }
   .empty-state .big { font-size: 30px; margin-bottom: 8px; }
 
-  footer.note {
-    margin-top: 40px;
-    padding-top: 16px;
-    border-top: 1px solid var(--line);
-    color: var(--text-dim);
-    font-size: 12px;
-    line-height: 1.7;
+  footer.note { margin-top: 40px; padding-top: 16px; border-top: 1px solid var(--line); color: var(--text-dim); font-size: 12px; line-height: 1.7; }
+
+  /* modal */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 50;
+    align-items: center; justify-content: center;
   }
+  .modal-overlay.visible { display: flex; }
+  .modal-box {
+    background: var(--panel-hi); border: 1px solid var(--line); border-radius: 10px; padding: 22px;
+    width: 92%; max-width: 420px; max-height: 80vh; overflow-y: auto;
+  }
+  .modal-box h2 { font-size: 16px; margin: 0 0 14px; }
+  .modal-box input[type=text] {
+    width: 100%; background: var(--ink); border: 1px solid var(--line); border-radius: 6px;
+    color: var(--text); padding: 9px 12px; font-family: 'Heebo', sans-serif; font-size: 14px; margin-bottom: 10px;
+  }
+  .search-results { margin-bottom: 12px; max-height: 180px; overflow-y: auto; }
+  .search-result-item {
+    padding: 8px 10px; border: 1px solid var(--line); border-radius: 6px; margin-bottom: 6px;
+    cursor: pointer; font-size: 13px; display: flex; justify-content: space-between; align-items: center;
+  }
+  .search-result-item:hover { border-color: var(--amber); }
+  .search-result-item.selected { border-color: var(--amber); background: rgba(232,163,61,0.08); }
+  .modal-actions { display: flex; gap: 8px; margin-top: 8px; }
+  .btn-primary {
+    background: var(--amber); color: #1a1206; border: none; font-weight: 700; font-size: 13px;
+    padding: 9px 16px; border-radius: 6px; cursor: pointer; flex: 1;
+  }
+  .btn-primary:disabled { opacity: 0.5; cursor: default; }
+  .btn-secondary {
+    background: transparent; color: var(--text-dim); border: 1px solid var(--line); font-size: 13px;
+    padding: 9px 16px; border-radius: 6px; cursor: pointer;
+  }
+  .field-label { font-size: 11px; color: var(--text-dim); margin-bottom: 4px; display: block; }
+  .modal-status { font-size: 12.5px; margin-top: 8px; min-height: 18px; }
+  .modal-status.err { color: var(--down); }
+  .modal-status.ok { color: var(--up); }
 </style>
 </head>
 <body>
 <div class="wrap">
 
   <header class="top">
-    <div class="title-block">
-      <div class="eyebrow">Local Dashboard · MVP</div>
+    <div>
+      <div class="eyebrow">Local-first Dashboard</div>
       <h1>מעקב מטבעות דיגיטליים</h1>
     </div>
     <div>
@@ -238,20 +185,57 @@
 
   <div class="filters" id="filters"></div>
 
+  <div class="detail-panel" id="detailPanel">
+    <div class="panel-box">
+      <h3 id="chartTitle">גרף מחיר</h3>
+      <div class="tab-row" id="chartTabs"></div>
+      <div class="chart-wrap"><canvas id="priceChart"></canvas></div>
+    </div>
+    <div class="panel-box">
+      <h3 id="summaryTitle">סיכום חדשות</h3>
+      <div class="tab-row" id="summaryTabs"></div>
+      <div id="summaryContent"><div class="summary-loading">טוען...</div></div>
+    </div>
+  </div>
+
   <div class="section-label">כתבות</div>
   <div id="newsList"></div>
 
   <footer class="note">
     מקורות: אתרי חדשות קריפטו בינלאומיים (CoinDesk, Cointelegraph, Decrypt, CryptoSlate, The Daily Hodl) + בלוגים רשמיים של הפרויקטים, כשקיימים.
-    מחירים: CoinGecko. הכל רץ מקומית — לחצו "רענון נתונים" כדי למשוך עדכונים חדשים.
+    מחירים וגרפים: CoinGecko. סיכומים נבנים אוטומטית מהכתבות שנאספו — אם מוגדר מפתח AI בשרת הם ינוסחו כטקסט חופשי, אחרת יוצג ריכוז כותרות.
   </footer>
 
+</div>
+
+<!-- Add coin modal -->
+<div class="modal-overlay" id="addCoinModal">
+  <div class="modal-box">
+    <h2>הוספת מטבע למעקב</h2>
+    <label class="field-label">חפש לפי שם או סימול</label>
+    <input type="text" id="coinSearchInput" placeholder="למשל: Cardano או ADA" oninput="onCoinSearchInput()">
+    <div class="search-results" id="searchResults"></div>
+    <label class="field-label">מילות מפתח לזיהוי בכתבות (מופרדות בפסיק)</label>
+    <input type="text" id="coinKeywords" placeholder="יתמלא אוטומטית לפי הבחירה, אפשר לערוך">
+    <div class="modal-status" id="modalStatus"></div>
+    <div class="modal-actions">
+      <button class="btn-primary" id="confirmAddBtn" disabled onclick="submitAddCoin()">הוסף למעקב</button>
+      <button class="btn-secondary" onclick="closeAddCoinModal()">ביטול</button>
+    </div>
+  </div>
 </div>
 
 <script>
 const API = "";
 let COINS = {};
-let activeFilter = null; // null = הכל
+let PRICES = {};
+let activeFilter = null;
+let selectedSearchResult = null;
+let chartInstance = null;
+let activeChartRange = "7d";
+let activeSummaryPeriod = "daily";
+
+// ---------- coins / ticker ----------
 
 async function loadCoins() {
   const res = await fetch(API + "/api/coins");
@@ -265,64 +249,302 @@ function renderFilters() {
   const allChip = document.createElement("button");
   allChip.className = "filter-chip" + (activeFilter === null ? " active" : "");
   allChip.textContent = "הכל";
-  allChip.onclick = () => { activeFilter = null; renderFilters(); loadNews(); highlightTicker(); };
+  allChip.onclick = () => selectCoin(null);
   el.appendChild(allChip);
 
   Object.keys(COINS).forEach(sym => {
     const chip = document.createElement("button");
     chip.className = "filter-chip" + (activeFilter === sym ? " active" : "");
     chip.textContent = sym;
-    chip.onclick = () => { activeFilter = sym; renderFilters(); loadNews(); highlightTicker(); };
+    chip.onclick = () => selectCoin(sym);
     el.appendChild(chip);
   });
 }
 
-function highlightTicker() {
-  document.querySelectorAll(".coin-card").forEach(c => {
-    c.classList.toggle("active", c.dataset.sym === activeFilter);
-  });
+function selectCoin(sym) {
+  activeFilter = activeFilter === sym ? (sym === null ? null : sym) : sym;
+  if (sym === null) activeFilter = null;
+  renderFilters();
+  renderTicker();
+  loadNews();
+  toggleDetailPanel();
+}
+
+function toggleDetailPanel() {
+  const panel = document.getElementById("detailPanel");
+  if (activeFilter) {
+    panel.classList.add("visible");
+    document.getElementById("chartTitle").textContent = `גרף מחיר — ${activeFilter}`;
+    document.getElementById("summaryTitle").textContent = `סיכום חדשות — ${activeFilter}`;
+    renderChartTabs();
+    renderSummaryTabs();
+    loadChart();
+    loadSummary();
+  } else {
+    panel.classList.remove("visible");
+  }
+}
+
+function formatPrice(v) {
+  if (v === undefined || v === null) return null;
+  return v >= 1 ? v.toFixed(3) : v.toFixed(5);
 }
 
 async function loadPrices() {
   const res = await fetch(API + "/api/prices");
   const prices = await res.json();
-  const bySym = {};
-  prices.forEach(p => bySym[p.coin] = p);
+  PRICES = {};
+  prices.forEach(p => PRICES[p.coin] = p);
+  renderTicker();
+}
 
+function renderTicker() {
   const strip = document.getElementById("tickerStrip");
   strip.innerHTML = "";
-  Object.entries(COINS).forEach(([sym, name]) => {
-    const p = bySym[sym];
+  Object.entries(COINS).forEach(([sym, info]) => {
+    const p = PRICES[sym];
     const card = document.createElement("div");
     card.className = "coin-card" + (activeFilter === sym ? " active" : "");
-    card.dataset.sym = sym;
-    card.onclick = () => { activeFilter = (activeFilter === sym ? null : sym); renderFilters(); loadNews(); highlightTicker(); };
+    card.onclick = (e) => { if (e.target.classList.contains("remove-x")) return; selectCoin(sym); };
 
-    if (p && p.usd !== null && p.usd !== undefined) {
-      const chg = p.usd_24h_change;
+    const removeHtml = info.custom ? `<span class="remove-x" title="הסר ממעקב" onclick="removeCoin('${sym}', event)">✕</span>` : "";
+
+    if (p && p.usd !== undefined && p.usd !== null) {
+      const chg = p.usd_24h_change || 0;
       const chgClass = chg >= 0 ? "up" : "down";
       const chgSign = chg >= 0 ? "+" : "";
       card.innerHTML = `
+        ${removeHtml}
         <div class="sym">${sym}</div>
-        <div class="name">${name}</div>
+        <div class="name">${info.name}</div>
         <div class="price">$${formatPrice(p.usd)}</div>
-        <div class="chg ${chgClass}">${chgSign}${chg !== null && chg !== undefined ? chg.toFixed(2) : "0.00"}%</div>
+        <div class="chg ${chgClass}">${chgSign}${chg.toFixed(2)}%</div>
       `;
     } else {
       card.innerHTML = `
+        ${removeHtml}
         <div class="sym">${sym}</div>
-        <div class="name">${name}</div>
-        <div class="no-data">אין נתון עדיין — לחץ רענון</div>
+        <div class="name">${info.name}</div>
+        <div class="no-data">אין נתון עדיין</div>
       `;
     }
     strip.appendChild(card);
   });
+
+  const addCard = document.createElement("div");
+  addCard.className = "add-coin-card";
+  addCard.onclick = openAddCoinModal;
+  addCard.innerHTML = `<div>+</div><div class="lbl">הוסף מטבע</div>`;
+  strip.appendChild(addCard);
 }
 
-function formatPrice(v) {
-  if (v >= 1) return v.toFixed(3);
-  return v.toFixed(5);
+async function removeCoin(sym, evt) {
+  evt.stopPropagation();
+  if (!confirm(`להסיר את ${sym} מהמעקב?`)) return;
+  await fetch(API + "/api/coins/" + sym, { method: "DELETE" });
+  if (activeFilter === sym) activeFilter = null;
+  await loadCoins();
+  await loadPrices();
+  toggleDetailPanel();
+  loadNews();
 }
+
+// ---------- add coin modal ----------
+
+function openAddCoinModal() {
+  document.getElementById("addCoinModal").classList.add("visible");
+  document.getElementById("coinSearchInput").value = "";
+  document.getElementById("coinKeywords").value = "";
+  document.getElementById("searchResults").innerHTML = "";
+  document.getElementById("modalStatus").textContent = "";
+  document.getElementById("modalStatus").className = "modal-status";
+  document.getElementById("confirmAddBtn").disabled = true;
+  selectedSearchResult = null;
+}
+function closeAddCoinModal() {
+  document.getElementById("addCoinModal").classList.remove("visible");
+}
+
+let searchDebounce = null;
+function onCoinSearchInput() {
+  clearTimeout(searchDebounce);
+  const q = document.getElementById("coinSearchInput").value.trim();
+  if (q.length < 2) { document.getElementById("searchResults").innerHTML = ""; return; }
+  searchDebounce = setTimeout(() => doCoinSearch(q), 350);
+}
+
+async function doCoinSearch(q) {
+  const container = document.getElementById("searchResults");
+  container.innerHTML = `<div class="summary-loading">מחפש...</div>`;
+  try {
+    const res = await fetch(API + "/api/coins/search?q=" + encodeURIComponent(q));
+    const data = await res.json();
+    if (data.error) { container.innerHTML = `<div class="modal-status err">${data.error}</div>`; return; }
+    if (!data.results || data.results.length === 0) { container.innerHTML = `<div class="summary-loading">לא נמצאו תוצאות</div>`; return; }
+    container.innerHTML = "";
+    data.results.forEach(r => {
+      const item = document.createElement("div");
+      item.className = "search-result-item";
+      item.innerHTML = `<span>${r.name} (${r.symbol})</span><span style="color:var(--text-dim)">${r.id}</span>`;
+      item.onclick = () => selectSearchResult(r, item);
+      container.appendChild(item);
+    });
+  } catch (e) {
+    container.innerHTML = `<div class="modal-status err">שגיאת רשת בחיפוש</div>`;
+  }
+}
+
+function selectSearchResult(r, itemEl) {
+  document.querySelectorAll(".search-result-item").forEach(el => el.classList.remove("selected"));
+  itemEl.classList.add("selected");
+  selectedSearchResult = r;
+  document.getElementById("coinKeywords").value = `${r.symbol.toLowerCase()}, ${r.name.toLowerCase()}`;
+  document.getElementById("confirmAddBtn").disabled = false;
+}
+
+async function submitAddCoin() {
+  if (!selectedSearchResult) return;
+  const statusEl = document.getElementById("modalStatus");
+  const btn = document.getElementById("confirmAddBtn");
+  btn.disabled = true;
+  statusEl.className = "modal-status";
+  statusEl.textContent = "מוסיף ומושך נתונים ראשוניים...";
+
+  const keywords = document.getElementById("coinKeywords").value.split(",").map(k => k.trim()).filter(Boolean);
+  try {
+    const res = await fetch(API + "/api/coins", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        symbol: selectedSearchResult.symbol,
+        name: selectedSearchResult.name,
+        coingecko_id: selectedSearchResult.id,
+        keywords: keywords,
+      }),
+    });
+    const data = await res.json();
+    if (data.error) {
+      statusEl.className = "modal-status err";
+      statusEl.textContent = data.error;
+      btn.disabled = false;
+      return;
+    }
+    statusEl.className = "modal-status ok";
+    statusEl.textContent = `${data.added} נוסף בהצלחה!`;
+    await loadCoins();
+    await loadPrices();
+    setTimeout(closeAddCoinModal, 700);
+  } catch (e) {
+    statusEl.className = "modal-status err";
+    statusEl.textContent = "שגיאת רשת בהוספה";
+    btn.disabled = false;
+  }
+}
+
+// ---------- chart ----------
+
+function renderChartTabs() {
+  const ranges = [["1d", "יום"], ["7d", "שבוע"], ["30d", "חודש"], ["1y", "שנה"]];
+  const el = document.getElementById("chartTabs");
+  el.innerHTML = "";
+  ranges.forEach(([key, label]) => {
+    const btn = document.createElement("button");
+    btn.className = "tab-btn" + (activeChartRange === key ? " active" : "");
+    btn.textContent = label;
+    btn.onclick = () => { activeChartRange = key; renderChartTabs(); loadChart(); };
+    el.appendChild(btn);
+  });
+}
+
+async function loadChart() {
+  const wrap = document.querySelector(".chart-wrap");
+  const canvas = document.getElementById("priceChart");
+  try {
+    const res = await fetch(API + `/api/chart?coin=${activeFilter}&range=${activeChartRange}`);
+    const data = await res.json();
+    if (data.error || !data.prices) {
+      if (chartInstance) { chartInstance.destroy(); chartInstance = null; }
+      wrap.querySelectorAll(".chart-loading").forEach(e => e.remove());
+      const msg = document.createElement("div");
+      msg.className = "chart-loading";
+      msg.textContent = "לא ניתן לטעון גרף כרגע";
+      wrap.appendChild(msg);
+      return;
+    }
+    wrap.querySelectorAll(".chart-loading").forEach(e => e.remove());
+    const labels = data.prices.map(p => new Date(p[0]));
+    const values = data.prices.map(p => p[1]);
+
+    if (chartInstance) chartInstance.destroy();
+    chartInstance = new Chart(canvas, {
+      type: "line",
+      data: {
+        labels,
+        datasets: [{
+          data: values,
+          borderColor: "#E8A33D",
+          backgroundColor: "rgba(232,163,61,0.08)",
+          borderWidth: 2,
+          pointRadius: 0,
+          fill: true,
+          tension: 0.15,
+        }],
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { type: "time", time: { unit: activeChartRange === "1d" ? "hour" : (activeChartRange === "1y" ? "month" : "day") },
+               ticks: { color: "#838C9B", maxTicksLimit: 6, font: { family: "JetBrains Mono", size: 10 } },
+               grid: { color: "#232933" } },
+          y: { ticks: { color: "#838C9B", font: { family: "JetBrains Mono", size: 10 } }, grid: { color: "#232933" } },
+        },
+      },
+    });
+  } catch (e) {
+    console.error("chart load failed", e);
+  }
+}
+
+// ---------- summary ----------
+
+function renderSummaryTabs() {
+  const periods = [["daily", "יומי"], ["weekly", "שבועי"]];
+  const el = document.getElementById("summaryTabs");
+  el.innerHTML = "";
+  periods.forEach(([key, label]) => {
+    const btn = document.createElement("button");
+    btn.className = "tab-btn" + (activeSummaryPeriod === key ? " active" : "");
+    btn.textContent = label;
+    btn.onclick = () => { activeSummaryPeriod = key; renderSummaryTabs(); loadSummary(); };
+    el.appendChild(btn);
+  });
+}
+
+async function loadSummary() {
+  const container = document.getElementById("summaryContent");
+  container.innerHTML = `<div class="summary-loading">בונה סיכום...</div>`;
+  try {
+    const res = await fetch(API + `/api/summary?coin=${activeFilter}&period=${activeSummaryPeriod}`);
+    const data = await res.json();
+    if (data.error) { container.innerHTML = `<div class="summary-loading">${data.error}</div>`; return; }
+    const badge = data.source === "ai" ? `<span class="tag ai">מנוסח ע"י AI</span>` : `<span class="tag">ריכוז אוטומטי</span>`;
+    container.innerHTML = `
+      <div class="summary-text">${escapeHtml(data.content)}</div>
+      <div class="summary-meta">${badge} · עודכן ${timeAgo(data.generated_at)}</div>
+    `;
+  } catch (e) {
+    container.innerHTML = `<div class="summary-loading">שגיאה בטעינת סיכום</div>`;
+  }
+}
+
+function escapeHtml(s) {
+  const d = document.createElement("div");
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+// ---------- news ----------
 
 function timeAgo(iso) {
   if (!iso) return "";
@@ -371,6 +593,8 @@ function stripHtml(html) {
   return tmp.textContent || tmp.innerText || "";
 }
 
+// ---------- refresh ----------
+
 async function refreshAll() {
   const btn = document.getElementById("refreshBtn");
   btn.disabled = true;
@@ -379,6 +603,7 @@ async function refreshAll() {
     await fetch(API + "/api/refresh", { method: "POST" });
     await loadPrices();
     await loadNews();
+    if (activeFilter) { loadChart(); loadSummary(); }
     document.getElementById("lastUpdated").textContent = "עודכן: " + new Date().toLocaleTimeString("he-IL");
   } catch (e) {
     document.getElementById("lastUpdated").textContent = "שגיאה ברענון — בדוק חיבור לאינטרנט";
