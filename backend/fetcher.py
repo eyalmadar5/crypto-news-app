@@ -412,14 +412,19 @@ def get_summary(symbol: str, period: str):
         content = _extractive_digest(symbol, coin_name, articles)
 
     now_iso = datetime.now(timezone.utc).isoformat()
-    conn.execute(
-        """INSERT INTO summaries (coin, period, bucket, content, source, generated_at)
-           VALUES (?, ?, ?, ?, ?, ?)
-           ON CONFLICT(coin, period, bucket) DO UPDATE SET content=excluded.content,
-               source=excluded.source, generated_at=excluded.generated_at""",
-        (symbol, period, bucket, content, source_used, now_iso),
-    )
-    conn.commit()
+
+    # חשוב: לא שומרים בקאש אם עדיין אין כתבות בכלל. אחרת "אין כתבות" נכנס
+    # לקאש ונשאר תקוע שם עד שהדלי (יום/שבוע) מתחלף, גם אם רגע אחרי זה
+    # מגיעות כתבות טריות. במקום זה - ננסה שוב מהתחלה בפעם הבאה שיבקשו.
+    if articles:
+        conn.execute(
+            """INSERT INTO summaries (coin, period, bucket, content, source, generated_at)
+               VALUES (?, ?, ?, ?, ?, ?)
+               ON CONFLICT(coin, period, bucket) DO UPDATE SET content=excluded.content,
+                   source=excluded.source, generated_at=excluded.generated_at""",
+            (symbol, period, bucket, content, source_used, now_iso),
+        )
+        conn.commit()
     conn.close()
     return {"coin": symbol, "period": period, "content": content, "source": source_used,
             "generated_at": now_iso, "cached": False}
